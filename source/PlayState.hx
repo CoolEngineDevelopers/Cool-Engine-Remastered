@@ -134,10 +134,16 @@ class PlayState extends MusicBeatState
 	var detailsPausedText:String = "";
 	#end
 
+	var Script = new FunkinScript();
+
 	override public function create()
 	{
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.stop();
+
+		Script.loadScript('data/${SONG.song.toLowerCase}/Modchart.hx');
+		Script.interp.scriptObject = this;
+		Script.call('onCreate', []);
 
 		// var gameCam:FlxCamera = FlxG.camera;
 		camGame = new FlxCamera();
@@ -229,7 +235,7 @@ class PlayState extends MusicBeatState
 
 		switch (SONG.song.toLowerCase())
 		{
-                        case 'spookeez' | 'monster' | 'south': 
+			case 'spookeez' | 'monster' | 'south': 
                         {
                                 curStage = 'spooky';
 	                          halloweenLevel = true;
@@ -1334,6 +1340,8 @@ class PlayState extends MusicBeatState
 
 	override public function update(elapsed:Float)
 	{
+		Script.call('update', [elapsed]);
+
 		#if !debug
 		perfectMode = false;
 		#end
@@ -1585,6 +1593,8 @@ class PlayState extends MusicBeatState
 			vocals.stop();
 			FlxG.sound.music.stop();
 
+			Script.call('P1Death');
+
 			openSubState(new GameOverSubstate(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
 
 			// FlxG.switchState(new GameOverState(boyfriend.getScreenPosition().x, boyfriend.getScreenPosition().y));
@@ -1649,6 +1659,7 @@ class PlayState extends MusicBeatState
 							altAnim = '-alt';
 					}
 
+					Script.call('P2NoteHit');
 					switch (Math.abs(daNote.noteData))
 					{
 						case 0:
@@ -1733,7 +1744,6 @@ class PlayState extends MusicBeatState
 
 				if (SONG.validScore)
 				{
-					NGio.unlockMedal(60961);
 					Highscore.saveWeekScore(storyWeek, campaignScore, storyDifficulty);
 				}
 
@@ -1958,7 +1968,7 @@ class PlayState extends MusicBeatState
 		var controlArray:Array<Bool> = [leftP, downP, upP, rightP];
 
 		// FlxG.watch.addQuick('asdfa', upP);
-		if ((upP || rightP || downP || leftP) && !boyfriend.stunned && generatedMusic)
+		if ((upP || rightP || downP || leftP) && generatedMusic)
 		{
 			boyfriend.holdTimer = 0;
 
@@ -2060,7 +2070,7 @@ class PlayState extends MusicBeatState
 			}
 		}
 
-		if ((up || right || down || left) && !boyfriend.stunned && generatedMusic)
+		if ((up || right || down || left) && generatedMusic)
 		{
 			notes.forEachAlive(function(daNote:Note)
 			{
@@ -2133,40 +2143,28 @@ class PlayState extends MusicBeatState
 
 	function noteMiss(direction:Int = 1):Void
 	{
-		if (!boyfriend.stunned)
+		health -= 0.04;
+		if (combo > 5 && gf.animOffsets.exists('sad'))
 		{
-			health -= 0.04;
-			if (combo > 5 && gf.animOffsets.exists('sad'))
-			{
-				gf.playAnim('sad');
-			}
-			combo = 0;
+			gf.playAnim('sad');
+		}
+		combo = 0;
 
-			songScore -= 10;
+		songScore -= 10;
 
-			FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
-			// FlxG.sound.play(Paths.sound('missnote1'), 1, false);
-			// FlxG.log.add('played imss note');
-
-			boyfriend.stunned = true;
-
-			// get stunned for 5 seconds
-			new FlxTimer().start(5 / 60, function(tmr:FlxTimer)
-			{
-				boyfriend.stunned = false;
-			});
-
-			switch (direction)
-			{
-				case 0:
-					boyfriend.playAnim('singLEFTmiss', true);
-				case 1:
-					boyfriend.playAnim('singDOWNmiss', true);
-				case 2:
-					boyfriend.playAnim('singUPmiss', true);
-				case 3:
-					boyfriend.playAnim('singRIGHTmiss', true);
-			}
+		FlxG.sound.play(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.1, 0.2));
+		// FlxG.sound.play(Paths.sound('missnote1'), 1, false);
+		// FlxG.log.add('played imss note');
+		switch (direction)
+		{
+			case 0:
+				boyfriend.playAnim('singLEFTmiss', true);
+			case 1:
+				boyfriend.playAnim('singDOWNmiss', true);
+			case 2:
+				boyfriend.playAnim('singUPmiss', true);
+			case 3:
+				boyfriend.playAnim('singRIGHTmiss', true);
 		}
 	}
 
@@ -2201,6 +2199,8 @@ class PlayState extends MusicBeatState
 
 	function goodNoteHit(note:Note):Void
 	{
+		Script.call('noteHit', []);
+
 		if (!note.wasGoodHit)
 		{
 			if (!note.isSustainNote)
@@ -2354,6 +2354,8 @@ class PlayState extends MusicBeatState
 	override function beatHit()
 	{
 		super.beatHit();
+
+		Script.call('beatHit', [curBeat]);
 
 		if (generatedMusic)
 		{

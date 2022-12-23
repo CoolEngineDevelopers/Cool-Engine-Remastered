@@ -35,6 +35,10 @@ class Paths
 		return getPreloadPath(file);
 	}
 
+	public static function getScript(file) {
+		return 'assets/$file.hx';
+	}
+
 	static public function getLibraryPath(file:String, library = "preload")
 	{
 		return if (library == "preload" || library == "default") getPreloadPath(file); else getLibraryPathForce(file, library);
