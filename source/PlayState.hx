@@ -141,7 +141,7 @@ class PlayState extends MusicBeatState
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.stop();
 
-		Script.loadScript('data/${SONG.song.toLowerCase}/Modchart.hx');
+		Script.loadScript('data/${SONG.song.toLowerCase}/Modchart');
 		Script.interp.scriptObject = this;
 		Script.call('onCreate', []);
 
@@ -2012,8 +2012,7 @@ class PlayState extends MusicBeatState
 									if (controlArray[ignoreList[shit]])
 										inIgnoreList = true;
 								}
-								if (!inIgnoreList)
-									badNoteCheck();
+			
 							}
 						}
 					}
@@ -2063,10 +2062,6 @@ class PlayState extends MusicBeatState
 						daNote.destroy();
 					}
 				 */
-			}
-			else
-			{
-				badNoteCheck();
 			}
 		}
 
@@ -2168,33 +2163,12 @@ class PlayState extends MusicBeatState
 		}
 	}
 
-	function badNoteCheck()
-	{
-		// just double pasting this shit cuz fuk u
-		// REDO THIS SYSTEM!
-		var upP = controls.UP_P;
-		var rightP = controls.RIGHT_P;
-		var downP = controls.DOWN_P;
-		var leftP = controls.LEFT_P;
 
-		if (leftP)
-			noteMiss(0);
-		if (downP)
-			noteMiss(1);
-		if (upP)
-			noteMiss(2);
-		if (rightP)
-			noteMiss(3);
-	}
 
 	function noteCheck(keyP:Bool, note:Note):Void
 	{
 		if (keyP)
 			goodNoteHit(note);
-		else
-		{
-			badNoteCheck();
-		}
 	}
 
 	function goodNoteHit(note:Note):Void
