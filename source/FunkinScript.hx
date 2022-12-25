@@ -43,7 +43,7 @@ class FunkinScript {
 		interp.variables.set("Paths",Paths);
 		interp.variables.set("CoolUtil",CoolUtil);
 
-        interp.variables.set('triggerEvent', Modchart.event);
+        interp.variables.set('Modchart', Modchart);
 	}
 
 	public function call(funcName:String, ?args:Array<Dynamic>):Dynamic
@@ -88,10 +88,12 @@ class Modchart {
     public static var noArgEvent = [];
 
 
-    public static function event(name:String, ?arg1, ?arg2) {
+    public static function triggerEvent(name:String, ?arg1, ?arg2) {
         switch(name) {
             case "Add Camera Zoom":
                 FlxG.camera.zoom += arg1;
+            case "Christmas State":
+                
         }
     }  
 }
